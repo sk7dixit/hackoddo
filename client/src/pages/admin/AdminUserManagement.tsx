@@ -94,8 +94,7 @@ export const AdminUserManagement: React.FC = () => {
       fetchData();
     } catch (err: any) {
       toast.error(
-        err.response?.data?.error ||
-          "Cannot delete user: Active holdings or bookings.",
+        err.message || "Cannot delete user: Active holdings or bookings.",
       );
     }
   };

@@ -241,7 +241,7 @@ export const AdminOrgSetup: React.FC = () => {
       resetDeptForm();
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to save department.");
+      toast.error(err.message || "Failed to save department.");
     }
   };
 
@@ -255,8 +255,7 @@ export const AdminOrgSetup: React.FC = () => {
       fetchData();
     } catch (err: any) {
       toast.error(
-        err.response?.data?.error ||
-          "Validation error: Cannot update department status.",
+        err.message || "Validation error: Cannot update department status.",
       );
     }
   };
@@ -274,8 +273,7 @@ export const AdminOrgSetup: React.FC = () => {
       fetchData();
     } catch (err: any) {
       toast.error(
-        err.response?.data?.error ||
-          "Cannot delete department: dependencies active.",
+        err.message || "Cannot delete department: dependencies active.",
       );
     }
   };
@@ -347,7 +345,7 @@ export const AdminOrgSetup: React.FC = () => {
       });
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to register category.");
+      toast.error(err.message || "Failed to register category.");
     }
   };
 
@@ -358,7 +356,7 @@ export const AdminOrgSetup: React.FC = () => {
       toast.success("Category removed.");
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Cannot delete category.");
+      toast.error(err.message || "Cannot delete category.");
     }
   };
 
@@ -389,7 +387,7 @@ export const AdminOrgSetup: React.FC = () => {
       });
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to save location.");
+      toast.error(err.message || "Failed to save location.");
     }
   };
 
@@ -400,7 +398,7 @@ export const AdminOrgSetup: React.FC = () => {
       toast.success("Location removed.");
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Cannot delete location.");
+      toast.error(err.message || "Cannot delete location.");
     }
   };
 
@@ -438,9 +436,7 @@ export const AdminOrgSetup: React.FC = () => {
       toast.success("Business calendar and hours settings updated.");
       fetchData();
     } catch (err: any) {
-      toast.error(
-        err.response?.data?.error || "Failed to save calendar hours.",
-      );
+      toast.error(err.message || "Failed to save calendar hours.");
     }
   };
 
@@ -457,7 +453,7 @@ export const AdminOrgSetup: React.FC = () => {
       setHolidayForm({ date: "", holiday: "", type: "National" });
       fetchData();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to add holiday.");
+      toast.error(err.message || "Failed to add holiday.");
     }
   };
 

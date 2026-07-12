@@ -118,7 +118,7 @@ export const AdminCreateUserWizard: React.FC = () => {
         toast.success("Employee workspace onboarded successfully!");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to onboard employee.");
+      toast.error(err.message || "Failed to onboard employee.");
     }
   };
 
