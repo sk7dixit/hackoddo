@@ -302,7 +302,7 @@ const initializeDatabase = () => {
       email: "departmenthead@gmail.com",
       password: "12345",
       role: "department_head",
-      employeeId: "EMP-1008",
+      employeeId: "EMP-1009",
       status: "active",
       departmentId: "HR",
     },
@@ -3703,7 +3703,7 @@ app.get("/api/admin/dashboard", (req: Request, res: Response) => {
       priority: "High",
       assignedTo: "Admin",
       time: "10 mins ago",
-      detail: "Employee EMP-1008 requested ERP role change to Department Head.",
+      detail: "Employee EMP-1009 requested ERP role change to Department Head.",
     },
     {
       type: "Pending Maintenance",
