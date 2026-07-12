@@ -45,6 +45,7 @@ import AdminActivityLogs from "../pages/admin/AdminActivityLogs";
 import AdminSettings from "../pages/admin/AdminSettings";
 import AdminProfile from "../pages/admin/AdminProfile";
 import AdminHelpCenter from "../pages/admin/AdminHelpCenter";
+import AdminApprovals from "../pages/admin/AdminApprovals";
 
 import EmployeeLayout from "../layouts/EmployeeLayout";
 import EmployeeDashboard from "../pages/employee/EmployeeDashboard";
@@ -154,6 +155,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="create-user" element={<AdminCreateUserWizard />} />
         <Route path="roles" element={<AdminRolePermissions />} />
         <Route path="audit" element={<AdminAuditManagement />} />
+        <Route path="approvals" element={<AdminApprovals />} />
         <Route path="reports" element={<AdminReportsAnalytics />} />
         <Route path="notifications" element={<AdminNotificationCenter />} />
         <Route path="activity-logs" element={<AdminActivityLogs />} />

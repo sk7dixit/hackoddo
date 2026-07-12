@@ -17,6 +17,7 @@ import {
   ClipboardCheck,
   BarChart3,
   Bell,
+  Inbox,
   History,
   Sliders,
   HelpCircle,
@@ -79,7 +80,9 @@ export const AdminLayout: React.FC = () => {
       }
 
       try {
-        const data = await api.get<any>(`/global/search?query=${encodeURIComponent(q)}`);
+        const data = await api.get<any>(
+          `/global/search?query=${encodeURIComponent(q)}`,
+        );
         const results: any[] = [];
 
         // Match assets
@@ -370,6 +373,20 @@ export const AdminLayout: React.FC = () => {
           </NavLink>
 
           <NavLink
+            to="/admin/approvals"
+            className={({ isActive }) =>
+              `flex items-center gap-3.5 px-3.5 h-12 rounded-[14px] transition-all border-l-[4px] ${
+                isActive
+                  ? "bg-[#EEF2FF] text-[#4F46E5] border-[#4F46E5] font-extrabold"
+                  : "hover:text-slate-805 hover:bg-[#F8FAFC] border-transparent"
+              }`
+            }
+          >
+            <Inbox className="w-[18px] h-[18px]" />
+            <span>Workflow Approvals</span>
+          </NavLink>
+
+          <NavLink
             to="/admin/reports"
             className={({ isActive }) =>
               `flex items-center gap-3.5 px-3.5 h-12 rounded-[14px] transition-all border-l-[4px] ${
@@ -440,7 +457,9 @@ export const AdminLayout: React.FC = () => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setSearchDropdownOpen(false);
-                    navigate(`/admin/search?q=${encodeURIComponent(searchQuery)}`);
+                    navigate(
+                      `/admin/search?q=${encodeURIComponent(searchQuery)}`,
+                    );
                   }
                 }}
                 className="w-full bg-white border border-[#E7ECF3] rounded-2xl pl-9 pr-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
