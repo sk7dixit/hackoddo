@@ -5442,113 +5442,118 @@ app.get("/api/admin/audits", (req: Request, res: Response) => {
 });
 
 app.post("/api/admin/audits", (req: Request, res: Response) => {
-  const db = readDb();
-  const {
-    name,
-    code,
-    scope,
-    startDate,
-    endDate,
-    deadline,
-    priority,
-    auditors,
-  } = req.body;
+  try {
+    const db = readDb();
+    const {
+      name,
+      code,
+      scope,
+      startDate,
+      endDate,
+      deadline,
+      priority,
+      auditors,
+    } = req.body;
 
-  if (
-    !name ||
-    !code ||
-    !scope ||
-    !startDate ||
-    !endDate ||
-    !deadline ||
-    !priority ||
-    !auditors ||
-    auditors.length === 0
-  ) {
-    res.status(400).json({
-      error: "All fields, including at least one auditor, are required.",
-    });
-    return;
-  }
+    if (
+      !name ||
+      !code ||
+      !scope ||
+      !startDate ||
+      !endDate ||
+      !deadline ||
+      !priority ||
+      !auditors ||
+      auditors.length === 0
+    ) {
+      res.status(400).json({
+        error: "All fields, including at least one auditor, are required.",
+      });
+      return;
+    }
 
-  // Code must be unique
-  const exists = (db.audits || []).some(
-    (a: any) => a.code.toLowerCase() === code.toLowerCase(),
-  );
-  if (exists) {
-    res.status(400).json({ error: `Audit code "${code}" already exists.` });
-    return;
-  }
-
-  // End date cannot precede start date
-  if (new Date(endDate) < new Date(startDate)) {
-    res.status(400).json({ error: "End date cannot precede the start date." });
-    return;
-  }
-
-  // Conflict of Interest check: Auditor cannot audit a department they directly manage
-  if (scope.type === "Department" && scope.departmentId) {
-    const dept = (db.departments || []).find(
-      (d: any) => d.id === scope.departmentId,
+    // Code must be unique
+    const exists = (db.audits || []).some(
+      (a: any) => a.code && a.code.toLowerCase() === code.toLowerCase(),
     );
-    if (dept && dept.headId) {
-      const isManagerAuditing = auditors.includes(dept.headId);
-      if (isManagerAuditing) {
+    if (exists) {
+      res.status(400).json({ error: `Audit code "${code}" already exists.` });
+      return;
+    }
+
+    // End date cannot precede start date
+    if (new Date(endDate) < new Date(startDate)) {
+      res.status(400).json({ error: "End date cannot precede the start date." });
+      return;
+    }
+
+    // Conflict of Interest check: Auditor cannot audit a department they directly manage
+    if (scope.type === "Department" && scope.departmentId) {
+      const dept = (db.departments || []).find(
+        (d: any) => d.id === scope.departmentId,
+      );
+      if (dept && dept.headId) {
+        const isManagerAuditing = auditors.includes(dept.headId);
+        if (isManagerAuditing) {
+          res.status(400).json({
+            error:
+              "Conflict of Interest: A department head cannot audit their own department.",
+          });
+          return;
+        }
+      }
+    }
+
+    // Workload validation: Max 2 active/running audits per auditor
+    for (const audId of auditors) {
+      const activeAuditsCount = (db.audits || []).filter(
+        (a: any) => a.status === "running" && a.auditors && a.auditors.includes(audId),
+      ).length;
+      if (activeAuditsCount >= 2) {
+        const userObj = (db.users || []).find((u: any) => u.id === audId);
         res.status(400).json({
-          error:
-            "Conflict of Interest: A department head cannot audit their own department.",
+          error: `Workload Limit: Auditor "${userObj?.name || audId}" is already assigned to 2 running audits.`,
         });
         return;
       }
     }
+
+    const newAudit = {
+      id: `AUD-${String((db.audits || []).length + 1).padStart(3, "0")}`,
+      name,
+      code,
+      scope,
+      startDate,
+      endDate,
+      deadline,
+      priority,
+      auditors,
+      status: "scheduled",
+      progress: 0,
+      verifiedCount: 0,
+      pendingCount: 50,
+      missingCount: 0,
+      damagedCount: 0,
+      timeline: [`Created on ${new Date().toISOString().split("T")[0]}`],
+      assets: [],
+    };
+
+    if (!db.audits) db.audits = [];
+    db.audits.push(newAudit);
+    recordEvent(
+      db,
+      "System Admin",
+      "Audit",
+      `Create Audit Cycle: ${name}`,
+      newAudit.id,
+      "Success",
+    );
+    writeDb(db);
+    res.status(201).json(newAudit);
+  } catch (err: any) {
+    console.error("Error in POST /api/admin/audits:", err);
+    res.status(500).json({ error: err.message, stack: err.stack });
   }
-
-  // Workload validation: Max 2 active/running audits per auditor
-  for (const audId of auditors) {
-    const activeAuditsCount = (db.audits || []).filter(
-      (a: any) => a.status === "running" && a.auditors.includes(audId),
-    ).length;
-    if (activeAuditsCount >= 2) {
-      const userObj = (db.users || []).find((u: any) => u.id === audId);
-      res.status(400).json({
-        error: `Workload Limit: Auditor "${userObj?.name || audId}" is already assigned to 2 running audits.`,
-      });
-      return;
-    }
-  }
-
-  const newAudit = {
-    id: `AUD-${String((db.audits || []).length + 1).padStart(3, "0")}`,
-    name,
-    code,
-    scope,
-    startDate,
-    endDate,
-    deadline,
-    priority,
-    auditors,
-    status: "scheduled",
-    progress: 0,
-    verifiedCount: 0,
-    pendingCount: 50,
-    missingCount: 0,
-    damagedCount: 0,
-    timeline: [`Created on ${new Date().toISOString().split("T")[0]}`],
-    assets: [],
-  };
-
-  if (!db.audits) db.audits = [];
-  db.audits.push(newAudit);
-  recordEvent(
-    db,
-    "System Admin",
-    "Audit",
-    `Create Audit Cycle: ${name}`,
-    newAudit.id,
-    "Success",
-  );
-  writeDb(db);
-  res.status(201).json(newAudit);
 });
 
 app.patch("/api/admin/audits/:id", (req: Request, res: Response) => {
