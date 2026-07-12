@@ -1,0 +1,22 @@
+{
+  "name": "assetflow-monorepo",
+  "version": "1.0.0",
+  "description": "Enterprise Asset & Resource Lifecycle Management System",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:client && npm run install:server",
+    "install:client": "npm install --workspace=client",
+    "install:server": "npm install --workspace=server",
+    "dev": "concurrently \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
+    "seed": "npm run seed --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "build:server": "npm run build --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
