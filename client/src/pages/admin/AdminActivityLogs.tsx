@@ -209,9 +209,11 @@ export const AdminActivityLogs: React.FC = () => {
   };
 
   const filteredLogs = logs.filter((l) => {
+    const userStr = l.user || (l as any).operator || "";
+    const actionStr = l.action || "";
     const matchesSearch =
-      l.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      l.action.toLowerCase().includes(searchTerm.toLowerCase());
+      userStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      actionStr.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesModule = moduleFilter === "All" || l.module === moduleFilter;
     return matchesSearch && matchesModule;
   });
@@ -486,7 +488,7 @@ export const AdminActivityLogs: React.FC = () => {
                       {log.timestamp || "Today"}
                     </td>
                     <td className="py-3.5 px-4 font-bold text-slate-850">
-                      {log.user}
+                      {log.user || (log as any).operator || "System"}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="bg-slate-50 border border-slate-200 px-2 py-0.5 rounded font-mono text-[10px] text-slate-650">
@@ -771,7 +773,11 @@ export const AdminActivityLogs: React.FC = () => {
                   </div>
                   <div className="flex justify-between py-1 border-b">
                     <span className="text-slate-400">Operator:</span>
-                    <span className="font-bold">{selectedLog.user}</span>
+                    <span className="font-bold">
+                      {selectedLog.user ||
+                        (selectedLog as any).operator ||
+                        "System"}
+                    </span>
                   </div>
                   <div className="flex justify-between py-1 border-b">
                     <span className="text-slate-400">Module Scope:</span>
