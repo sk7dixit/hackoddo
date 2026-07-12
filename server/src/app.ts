@@ -2374,6 +2374,32 @@ app.post("/api/assets", (req: Request, res: Response) => {
     "system",
   );
 
+  if (newAsset.sharedResource) {
+    if (!db.resources) db.resources = [];
+    const capacityVal =
+      newAsset.categoryId === "Meeting Rooms"
+        ? 8
+        : newAsset.categoryId === "Conference Halls"
+          ? 50
+          : newAsset.categoryId === "Projectors"
+            ? 1
+            : newAsset.categoryId === "Vehicles"
+              ? 5
+              : newAsset.categoryId === "Training Rooms"
+                ? 30
+                : 10;
+
+    db.resources.push({
+      resourceId: newAsset.id,
+      resourceName: newAsset.name,
+      category: newAsset.categoryId,
+      location: newAsset.location,
+      capacity: capacityVal,
+      status: "available",
+      isBookable: true,
+    });
+  }
+
   writeDb(db);
   res.status(201).json(newAsset);
 });
@@ -2421,6 +2447,17 @@ app.patch("/api/assets/:id", (req: Request, res: Response) => {
     "Success",
   );
 
+  if (!db.resources) db.resources = [];
+  const resrcIdx = db.resources.findIndex(
+    (r: any) => r.resourceId === asset.id,
+  );
+  if (resrcIdx !== -1) {
+    const resrc = db.resources[resrcIdx];
+    resrc.resourceName = asset.name;
+    resrc.category = asset.categoryId;
+    resrc.location = asset.location;
+  }
+
   writeDb(db);
   res.json(asset);
 });
@@ -2457,6 +2494,15 @@ app.delete("/api/assets/:id", (req: Request, res: Response) => {
     req.params.id,
     "Success",
   );
+
+  if (!db.resources) db.resources = [];
+  const resrcIdx = db.resources.findIndex(
+    (r: any) => r.resourceId === req.params.id,
+  );
+  if (resrcIdx !== -1) {
+    db.resources[resrcIdx].status = "retired";
+    db.resources[resrcIdx].isBookable = false;
+  }
 
   writeDb(db);
   res.json({
@@ -5483,7 +5529,9 @@ app.post("/api/admin/audits", (req: Request, res: Response) => {
 
     // End date cannot precede start date
     if (new Date(endDate) < new Date(startDate)) {
-      res.status(400).json({ error: "End date cannot precede the start date." });
+      res
+        .status(400)
+        .json({ error: "End date cannot precede the start date." });
       return;
     }
 
@@ -5507,7 +5555,8 @@ app.post("/api/admin/audits", (req: Request, res: Response) => {
     // Workload validation: Max 2 active/running audits per auditor
     for (const audId of auditors) {
       const activeAuditsCount = (db.audits || []).filter(
-        (a: any) => a.status === "running" && a.auditors && a.auditors.includes(audId),
+        (a: any) =>
+          a.status === "running" && a.auditors && a.auditors.includes(audId),
       ).length;
       if (activeAuditsCount >= 2) {
         const userObj = (db.users || []).find((u: any) => u.id === audId);
